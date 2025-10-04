@@ -1,12 +1,13 @@
 {
-  "name": "template-web-game",
+  "name": "defender-game",
   "version": "1.0.0",
-  "description": "Template for develop web game with Phaser 3, TypeScript and Vite",
+  "description": "Tower Defense game built with Phaser 3, TypeScript and Vite - High performance, accessible, mobile-friendly",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "type-check": "tsc --noEmit"
   },
   "keywords": [
     "phaser",
@@ -14,9 +15,12 @@
     "typescript",
     "vite",
     "game",
-    "template"
+    "tower-defense",
+    "td-game",
+    "arcade",
+    "browser-game"
   ],
-  "author": "pnstack",
+  "author": "npsg02",
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^24.6.2",

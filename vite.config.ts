@@ -2,13 +2,14 @@ import { defineConfig } from 'vite';
 import path from 'path';
 
 export default defineConfig({
-  base: '/template-web-game/',
+  base: '/defender-game/',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
   },
   build: {
+    target: 'es2020',
     rollupOptions: {
       output: {
         manualChunks: {
@@ -16,5 +17,10 @@ export default defineConfig({
         },
       },
     },
+    chunkSizeWarningLimit: 1000,
+  },
+  server: {
+    port: 3000,
+    open: true,
   },
 });

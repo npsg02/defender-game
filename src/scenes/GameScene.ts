@@ -1,138 +1,113 @@
+/**
+ * GameScene.ts
+ * Main gameplay scene for Tower Defense
+ * 
+ * Responsibilities:
+ * - Render game map and path
+ * - Manage towers, enemies, and projectiles
+ * - Handle wave spawning and game logic
+ * - Process player input for tower placement
+ */
+
 import Phaser from 'phaser';
+import { CONFIG, COLORS, DEPTH } from '@/game/Config';
 
 export class GameScene extends Phaser.Scene {
-  private player?: Phaser.Physics.Arcade.Sprite;
-  private cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
-  private platforms?: Phaser.Physics.Arcade.StaticGroup;
-  private stars?: Phaser.Physics.Arcade.Group;
-  private score = 0;
-  private scoreText?: Phaser.GameObjects.Text;
+  private gameMap!: Phaser.GameObjects.Graphics;
+  private path: { x: number; y: number }[] = [];
 
   constructor() {
     super({ key: 'GameScene' });
   }
 
-  create() {
-    // Add title
-    this.add.text(400, 50, 'Phaser 3 Game Template', {
-      fontSize: '32px',
-      color: '#ffffff',
-    }).setOrigin(0.5);
+  create(): void {
+    // Set background
+    this.cameras.main.setBackgroundColor(COLORS.BG_DARK);
 
-    // Create platforms
-    this.platforms = this.physics.add.staticGroup();
+    // Create game map
+    this.createMap();
+
+    // Create path
+    this.createPath();
+
+    // Initialize game systems (will be implemented progressively)
+    this.setupInput();
+
+    console.log('[GameScene] Scene created and ready');
+  }
+
+  update(_time: number, _delta: number): void {
+    // Update game logic
+  }
+
+  private createMap(): void {
+    const { WIDTH, HEIGHT, TILE_SIZE } = CONFIG;
     
-    // Ground
-    const ground = this.add.rectangle(400, 568, 800, 64, 0x00ff00);
-    this.physics.add.existing(ground, true);
-    this.platforms.add(ground);
+    this.gameMap = this.add.graphics();
+    this.gameMap.setDepth(DEPTH.BACKGROUND);
 
-    // Platform ledges
-    const platform1 = this.add.rectangle(600, 400, 200, 32, 0x00ff00);
-    this.physics.add.existing(platform1, true);
-    this.platforms.add(platform1);
+    // Draw grid for buildable areas
+    this.gameMap.lineStyle(1, 0xffffff, 0.1);
+    for (let x = 0; x < WIDTH; x += TILE_SIZE) {
+      this.gameMap.lineBetween(x, 0, x, HEIGHT);
+    }
+    for (let y = 0; y < HEIGHT; y += TILE_SIZE) {
+      this.gameMap.lineBetween(0, y, WIDTH, y);
+    }
 
-    const platform2 = this.add.rectangle(50, 250, 200, 32, 0x00ff00);
-    this.physics.add.existing(platform2, true);
-    this.platforms.add(platform2);
-
-    const platform3 = this.add.rectangle(750, 220, 200, 32, 0x00ff00);
-    this.physics.add.existing(platform3, true);
-    this.platforms.add(platform3);
-
-    // Create player
-    this.player = this.physics.add.sprite(100, 450, '');
-    this.player.setDisplaySize(32, 48);
-    this.player.setTint(0xff0000);
-    const playerGraphics = this.add.graphics();
-    playerGraphics.fillStyle(0xff0000, 1);
-    playerGraphics.fillRect(84, 426, 32, 48);
-    this.player.setBounce(0.2);
-    this.player.setCollideWorldBounds(true);
-
-    // Add collision between player and platforms
-    this.physics.add.collider(this.player, this.platforms);
-
-    // Create stars
-    this.stars = this.physics.add.group({
-      key: '',
-      repeat: 11,
-      setXY: { x: 12, y: 0, stepX: 70 },
-    });
-
-    this.stars.children.iterate((child) => {
-      const star = child as Phaser.Physics.Arcade.Sprite;
-      star.setDisplaySize(24, 24);
-      star.setTint(0xffff00);
-      star.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
-      
-      // Draw star shape
-      const x = star.x;
-      const y = star.y;
-      const starGraphics = this.add.graphics();
-      starGraphics.fillStyle(0xffff00, 1);
-      starGraphics.fillCircle(x, y, 12);
-      
-      return true;
-    });
-
-    this.physics.add.collider(this.stars, this.platforms);
-    this.physics.add.overlap(
-      this.player,
-      this.stars,
-      this.collectStar as Phaser.Types.Physics.Arcade.ArcadePhysicsCallback,
-      undefined,
-      this
-    );
-
-    // Score text
-    this.scoreText = this.add.text(16, 16, 'Score: 0', {
-      fontSize: '24px',
-      color: '#ffffff',
-    });
-
-    // Controls
-    this.cursors = this.input.keyboard?.createCursorKeys();
-
-    // Instructions
-    this.add.text(400, 100, 'Use Arrow Keys to Move', {
-      fontSize: '18px',
-      color: '#ffffff',
-    }).setOrigin(0.5);
+    // Fill background
+    this.gameMap.fillStyle(COLORS.BUILDABLE, 0.3);
+    this.gameMap.fillRect(0, 0, WIDTH, HEIGHT);
   }
 
-  update() {
-    if (!this.player || !this.cursors) return;
+  private createPath(): void {
+    // Create a simple winding path from left to right
+    this.path = [
+      { x: 0, y: 360 },
+      { x: 200, y: 360 },
+      { x: 200, y: 200 },
+      { x: 400, y: 200 },
+      { x: 400, y: 500 },
+      { x: 800, y: 500 },
+      { x: 800, y: 300 },
+      { x: 1100, y: 300 },
+      { x: 1100, y: 400 },
+      { x: 1280, y: 400 },
+    ];
 
-    if (this.cursors.left.isDown) {
-      this.player.setVelocityX(-160);
-    } else if (this.cursors.right.isDown) {
-      this.player.setVelocityX(160);
-    } else {
-      this.player.setVelocityX(0);
+    // Draw the path
+    const graphics = this.add.graphics();
+    graphics.setDepth(DEPTH.PATH);
+    
+    graphics.lineStyle(60, COLORS.PATH, 1);
+    graphics.beginPath();
+    graphics.moveTo(this.path[0].x, this.path[0].y);
+    
+    for (let i = 1; i < this.path.length; i++) {
+      graphics.lineTo(this.path[i].x, this.path[i].y);
     }
+    
+    graphics.strokePath();
 
-    if (this.cursors.up.isDown && this.player.body?.touching.down) {
-      this.player.setVelocityY(-330);
-    }
+    // Mark start and end points
+    graphics.fillStyle(0x00ff00, 1);
+    graphics.fillCircle(this.path[0].x, this.path[0].y, 20);
+    
+    graphics.fillStyle(0xff0000, 1);
+    graphics.fillCircle(this.path[this.path.length - 1].x, this.path[this.path.length - 1].y, 20);
   }
 
-  private collectStar(
-    _player: Phaser.Types.Physics.Arcade.GameObjectWithBody,
-    star: Phaser.Types.Physics.Arcade.GameObjectWithBody
-  ) {
-    const starSprite = star as Phaser.Physics.Arcade.Sprite;
-    starSprite.disableBody(true, true);
+  private setupInput(): void {
+    // Mouse input for tower placement
+    this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      console.log(`Clicked at: ${pointer.x}, ${pointer.y}`);
+      // Tower placement logic will be added later
+    });
 
-    this.score += 10;
-    this.scoreText?.setText('Score: ' + this.score);
-
-    if (this.stars?.countActive(true) === 0) {
-      this.stars.children.iterate((child) => {
-        const star = child as Phaser.Physics.Arcade.Sprite;
-        star.enableBody(true, star.x, 0, true, true);
-        return true;
-      });
-    }
+    // Keyboard shortcuts
+    this.input.keyboard?.on('keydown-P', () => {
+      this.scene.pause();
+      this.scene.launch('PauseScene');
+    });
   }
 }
