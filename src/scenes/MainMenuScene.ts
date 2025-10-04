@@ -11,6 +11,7 @@
 
 import Phaser from 'phaser';
 import { CONFIG, COLORS } from '@/game/Config';
+import { SaveSystem } from '@/systems/SaveSystem';
 
 export class MainMenuScene extends Phaser.Scene {
   private buttons: Phaser.GameObjects.Container[] = [];
@@ -131,10 +132,26 @@ export class MainMenuScene extends Phaser.Scene {
 
   private continueGame(): void {
     // Load save data and start game
-    // TODO: Implement save system
-    console.log('[MainMenu] Continue game - loading save data');
-    this.scene.start('GameScene');
-    this.scene.launch('UIScene');
+    const saveData = SaveSystem.load();
+    
+    if (saveData) {
+      // Restore game state to registry
+      this.registry.set('gold', saveData.gold);
+      this.registry.set('lives', saveData.lives);
+      this.registry.set('currentWave', saveData.currentWave);
+      this.registry.set('gameSpeed', 1);
+      this.registry.set('savedTowers', saveData.towers);
+      this.registry.set('levelId', saveData.levelId);
+      
+      console.log('[MainMenu] Loaded save data:', saveData);
+      
+      // Start game
+      this.scene.start('GameScene');
+      this.scene.launch('UIScene');
+    } else {
+      console.error('[MainMenu] Failed to load save data');
+      this.startNewGame();
+    }
   }
 
   private openSettings(): void {
@@ -206,6 +223,6 @@ export class MainMenuScene extends Phaser.Scene {
 
   private checkSaveExists(): boolean {
     // Check localStorage for save data
-    return localStorage.getItem('defender-save') !== null;
+    return SaveSystem.hasSave();
   }
 }
