@@ -68,6 +68,18 @@ npm run build
 - **Victory**: Survive all waves
 - **Defeat**: Lose all lives
 
+### Towers
+
+| Tower | Cost | Damage | Range | Rate | Special |
+|-------|------|--------|-------|------|---------|
+| **Arrow** | 100g | 15 | Medium | 1.0/s | Basic damage |
+| **Cannon** | 200g | 40 | Long | 0.5/s | AoE splash damage |
+| **Ice** | 150g | 10 | Medium | 0.8/s | Slows enemies 50% |
+| **Tesla** | 250g | 25 | Short | 1.5/s | Chains to 3 targets |
+| **Support** | 180g | 0 | Long | - | Buffs nearby towers +25% |
+
+*All towers can be upgraded 3 times for increased damage, range, and fire rate*
+
 ### Enemy Types
 
 | Type | HP | Speed | Armor | Reward |
@@ -87,9 +99,23 @@ npm run build
 
 ## 🎮 Controls
 
-- **P / ESC**: Pause game
-- **+/-**: Game speed
-- **Mouse**: Tower placement
+### Gameplay
+- **Left Click**: Place selected tower / Select tower for info
+- **Right Click / ESC**: Cancel tower placement
+- **Space**: Start next wave
+- **P**: Pause game
+
+### Tower Selection
+- Click tower buttons at bottom of screen
+- Hover to see tower stats
+- Green outline when affordable
+- Red outline when too expensive
+
+### Tower Placement
+- Select tower from build menu
+- Ghost preview shows placement position
+- Green = Valid placement
+- Red = Invalid (too close to path/towers or out of bounds)
 
 ## 🏗️ Architecture
 
@@ -99,6 +125,9 @@ npm run build
 - **Wave Manager**: Enemy spawning
 - **Economy**: Gold management
 - **Enemy System**: Health, damage, status effects
+- **Tower System**: Placement, targeting, upgrades
+- **Combat System**: Projectiles, damage, special effects
+- **Save/Load**: Game state persistence
 - **Object Pooling**: Performance optimization
 
 ### Scene Lifecycle
@@ -135,9 +164,11 @@ npm run build
 - ✅ Economy system
 - ✅ Enemy base class
 - ✅ Game balance data
-- 🚧 Tower system (in progress)
-- 🚧 Combat and projectiles (planned)
-- 🚧 Save/load system (planned)
+- ✅ Tower system (fully implemented)
+- ✅ Combat and projectiles (fully implemented)
+- ✅ Save/load system (fully implemented)
+- 🚧 UI improvements (tower upgrade/sell panel)
+- 🚧 Visual effects and polish
 
 ## 🤝 Contributing
 
@@ -155,4 +186,4 @@ MIT License - see LICENSE file
 
 ---
 
-**Status**: Active Development | **Version**: 0.5.0 (Alpha)
+**Status**: Active Development | **Version**: 1.0.0 (Beta) | **Playable**: ✅

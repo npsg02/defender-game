@@ -342,6 +342,13 @@ export class EnemyBase extends Phaser.GameObjects.Container {
   }
 
   /**
+   * Get current HP
+   */
+  getCurrentHP(): number {
+    return this.currentHP;
+  }
+
+  /**
    * Clean up
    */
   destroy(fromScene?: boolean): void {
